@@ -9,7 +9,7 @@ export const config = {
 // Function to detect food and calories from a base64 encoded image
 async function detectFoodAndCalories(base64Image) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY;
-    const model = 'gemini-pro-vision'; // Specified model for detection
+    const model = 'gemini-1.5-flash';
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     // Extract MIME type and pure base64 data from the image string
@@ -43,16 +43,22 @@ async function detectFoodAndCalories(base64Image) {
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestBody),
         });
 
+        // 디버그: 구글 API 응답 전체를 터미널에 출력
+        const debugText = await response.text();
+        console.log('Google API raw response:', debugText);
+
+        // 다시 파싱해서 사용
+        const data = JSON.parse(debugText);
+
         if (!response.ok) {
-            throw new Error(`API call failed with status: ${response.status}, ${await response.text()}`);
+            throw new Error(`API call failed with status: ${response.status}, ${debugText}`);
         }
 
-        const data = await response.json();
         const text = data.candidates[0].content.parts[0].text;
         const regex = /\{.*?\}/s; // The 's' flag allows '.' to match newline characters
         const match = text.match(regex);

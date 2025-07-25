@@ -1,6 +1,6 @@
 import { useState } from "react";
 import LoadingSpinner from "@/components/spinner";
-import { AlertModal } from "@/components/model/alert";
+import {AlertModal} from "@/components/model/alert";
 
 // Defines the main component for the calorie calculator page
 export const CalorieCalculatorPage = () => {
@@ -11,7 +11,6 @@ export const CalorieCalculatorPage = () => {
     const [isLoading, setLoading] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
-    const [imageUrl, setImageUrl] = useState(""); // 추가: 이미지 URL 상태
 
 
     const handleImageUpload = async (event) => {
@@ -115,40 +114,6 @@ export const CalorieCalculatorPage = () => {
         );
     };
 
-    // 이미지 URL을 base64로 변환하는 함수 (에러 유형별 메시지 추가)
-    const convertImageUrlToBase64 = async (url) => {
-        try {
-            const response = await fetch(url, { mode: 'cors' });
-            if (!response.ok) {
-                throw new Error('이미지 서버에서 응답이 없습니다. (HTTP 상태: ' + response.status + ')');
-            }
-            const blob = await response.blob();
-            return await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error('이미지 파일을 읽는 중 오류가 발생했습니다.'));
-                reader.readAsDataURL(blob);
-            });
-        } catch (error) {
-            if (error.message.includes('Failed to fetch')) {
-                throw new Error('이미지 서버에 접근할 수 없습니다. (CORS 정책 또는 네트워크 문제)');
-            }
-            throw error;
-        }
-    };
-
-    // 이미지 URL로부터 base64 변환 및 에러 메시지 처리
-    const handleImageUrlSubmit = async () => {
-        try {
-            const base64Image = await convertImageUrlToBase64(imageUrl);
-            setUploadedImage(base64Image);
-            sendImageToServer(base64Image);
-        } catch (error) {
-            setShowAlert(true);
-            setAlertMessage(error.message || "이미지 URL을 불러오지 못했습니다.");
-        }
-    };
-
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-2">
             {isLoading && (
@@ -186,27 +151,13 @@ export const CalorieCalculatorPage = () => {
                 </div>
             </div>
 
-            <div className="mb-4 flex gap-2">
-                <input
-                    type="text"
-                    name="image-url"
-                    autoComplete="off"
-                    placeholder="이미지 URL 입력"
-                    value={imageUrl}
-                    onChange={e => setImageUrl(e.target.value)}
-                    className="input input-bordered w-80 bg-white text-black"
-                />
-                <button className="btn btn-secondary" onClick={handleImageUrlSubmit}>
-                    URL로 이미지 분석
-                </button>
-            </div>
-
             <FAQSection />
 
             <AlertModal show={showAlert} onClose={closeAlertModal} type="error" message={alertMessage} />
         </div>
     );
 };
+
 
 
 
@@ -351,10 +302,7 @@ const FAQSection = () => {
             <div className="divider"></div>
             <h2 className="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
             {faqs.map((faq, index) => (
-                <div
-                    key={index}
-                    className="collapse collapse-plus border border-base-300 bg-gray-100 rounded-box mb-2" // bg-base-100 → bg-gray-100
-                >
+                <div key={index} className="collapse collapse-plus border border-base-300 bg-base-100 rounded-box mb-2">
                     <input type="checkbox" className="peer" />
                     <div className="collapse-title text-lg font-medium">
                         {faq.question}
